@@ -3,13 +3,40 @@
             [quil.middleware :as m]
             [quil.applet :as a]))
 
-(def dimensions [500 500])
 (def width 500)
 (def height 500)
+(def pixcount (* width height))
+
+(defn neighbors [i count rad row-len]
+  (let [x1 (mod i row-len)
+        y1 (int (/ i row-len))
+        m  (* -1 rad)
+        n  (inc rad)]
+    (for [x2 (range m n)
+          :let [x (+ x1 x2)]
+          :when (> x -1)
+          
+          y2 (range m n)
+          :let [y (+ y1 y2)]
+          :when (> y -1)]
+      [x y])))
+
+(defn cell-i [[x y] row-len]
+  (+ x (* y row-len)))
+
+(defn blur [i rad row-len pixels]
+  (let [cells (neighbors i pixcount rad width)
+        weight (/ 1 (count cells))]
+    (apply + (map #(* weight %)
+                  (map #(aget pixels (cell-i % row-len)) cells)))))
 
 (defn draw []
-  (let [pixels (q/pixels)]
-    ()))
+  (let [indexes (range pixcount)
+        pixels  (q/pixels)
+        pixelsb (mapv #(blur % 3 width pixels) indexes)]
+    (doseq [i indexes]
+      (aset pixels i (q/color (q/random 255) (q/random 255) (q/random 255))))
+    (q/update-pixels)))
 
 (defn setup []
   (q/frame-rate 30)

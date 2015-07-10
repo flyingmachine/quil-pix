@@ -3,13 +3,15 @@
             [quil.middleware :as m]
             [quil.applet :as a]))
 
-(def width 500)
-(def height 500)
+(def width 10)
+(def height 10)
 (def pixcount (* width height))
 
+(defn xy [i row-len]
+  [(mod i row-len) (int (/ i row-len))])
+
 (defn neighbors [i count rad row-len]
-  (let [x1 (mod i row-len)
-        y1 (int (/ i row-len))
+  (let [[x1 y1] (xy i row-len)
         m  (* -1 rad)
         n  (inc rad)]
     (for [x2 (range m n)
@@ -21,22 +23,25 @@
           :when (> y -1)]
       [x y])))
 
+(defn random-color []
+  (q/color (q/random 255) (q/random 255) (q/random 255)))
+
 (defn cell-i [[x y] row-len]
   (+ x (* y row-len)))
 
 (defn blur [i rad row-len pixels]
-  (let [cells (neighbors i pixcount rad width)
-        weight (/ 1 (count cells))]
-    (apply + (map #(* weight %)
-                  (map #(aget pixels (cell-i % row-len)) cells)))))
+  (let [cells (neighbors i pixcount rad width)]
+
+    
+    (random-color)))
 
 (defn draw []
-  (let [indexes (range pixcount)
-        pixels  (q/pixels)
-        pixelsb (mapv #(blur % 3 width pixels) indexes)]
-    (doseq [i indexes]
-      (aset pixels i (q/color (q/random 255) (q/random 255) (q/random 255))))
-    (q/update-pixels)))
+  (let [pixels  (q/pixels)
+        pixelsb (mapv #(blur % 3 width pixels) (range pixcount))
+        img (q/create-image width height :argb)]
+    (doseq [i (range pixcount)]
+      (let [[x y] (xy i width)]
+        (q/set-pixel x y (get pixelsb i))))))
 
 (defn setup []
   (q/frame-rate 30)

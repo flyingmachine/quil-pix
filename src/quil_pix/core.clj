@@ -3,21 +3,24 @@
             [quil.middleware :as m]
             [quil.applet :as a]))
 
-(defn setup []
-  ; Set frame rate to 30 frames per second.
-  (q/frame-rate 1)
-  ; Set color mode to HSB (HSV) instead of default RGB.
-  (q/color-mode :rgb))
+(def dimensions [500 500])
+(def width 500)
+(def height 500)
 
 (defn draw []
-  ; Clear the sketch by filling it with light-grey color.
-  (println "test")
-  (let [img (q/create-image 200 200 :argb)]
-    (q/set-pixel 100 100 (q/color (q/random 255) (q/random 255) (q/random 255)))))
+  (let [pixels (q/pixels)]
+    ()))
+
+(defn setup []
+  (q/frame-rate 30)
+  (q/color-mode :rgb)
+  (let [img (q/create-image width height :argb)]
+    (doseq [[x y] (for [x (range width) y (range height)] [x y])]
+      (q/set-pixel x y (q/color (q/random 255) (q/random 255) (q/random 255))))))
 
 (q/defsketch hello-quil
   :title "You spin my circle right round"
-  :size [500 500]
+  :size [width height]
   ; setup function called only once, during sketch initialization.
   :setup setup
   ; update-state is called on each iteration before draw-state.

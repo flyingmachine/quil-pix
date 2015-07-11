@@ -3,24 +3,24 @@
             [quil.middleware :as m]
             [quil.applet :as a]))
 
-(def width 10)
-(def height 10)
+(def width 150)
+(def height 150)
 (def pixcount (* width height))
 
 (defn xy [i row-len]
   [(mod i row-len) (int (/ i row-len))])
 
-(defn neighbors [i count rad row-len]
+(defn neighbors [i count rad row-len rows]
   (let [[x1 y1] (xy i row-len)
         m  (* -1 rad)
         n  (inc rad)]
     (for [x2 (range m n)
           :let [x (+ x1 x2)]
-          :when (> x -1)
+          :when (and (> x -1) (< x row-len))
           
           y2 (range m n)
           :let [y (+ y1 y2)]
-          :when (> y -1)]
+          :when (and (> y -1) (< y rows))]
       [x y])))
 
 (defn random-color []
@@ -29,19 +29,57 @@
 (defn cell-i [[x y] row-len]
   (+ x (* y row-len)))
 
+(def log (clojure.java.io/writer "log.txt"))
+
 (defn blur [i rad row-len pixels]
-  (let [cells (neighbors i pixcount rad width)]
+  (let [cells (neighbors i pixcount rad width height)
+        cc    (count cells)]
+    (reduce + (map #(/ (get pixels (cell-i % row-len))
+                      cc)
+                  cells))))
 
-    
-    (random-color)))
+(defn ppmap
+  "Partitioned pmap, for grouping map ops together to make parallel
+  overhead worthwhile"
+  [grain-size f & colls]
+  (apply concat
+   (apply pmap
+          (fn [& pgroups] (doall (apply map f pgroups)))
+          (map (partial partition-all grain-size) colls))))
 
-(defn draw []
+(defn next-image
+  [pixels]
+  (mapv #(blur % 3 width pixels) (range pixcount)))
+
+(defn next-image
+  [pixels]
+  (into [] (pmap #(blur % 3 width pixels) (range pixcount))))
+
+(defn next-image
+  [pixels]
+  (into [] (ppmap 100 #(blur % 3 width pixels) (range pixcount))))
+
+(defn draw1 []
   (let [pixels  (q/pixels)
-        pixelsb (mapv #(blur % 3 width pixels) (range pixcount))
+        pixelsb (next-image pixels)
+        img (q/create-image width height :argb)
+        ips (partition-all 100 (range pixcount))]
+    (doseq [f (doall (map (fn [ip]
+                            (future (doseq [i ip]
+                                      (let [[x y] (xy i width)]
+                                        (q/set-pixel x y (get pixelsb i))))))
+                          ips))]
+      @f)))
+
+(defn draw2 []
+  (let [pixels  (q/pixels)
+        pixelsb (next-image pixels)
         img (q/create-image width height :argb)]
     (doseq [i (range pixcount)]
       (let [[x y] (xy i width)]
         (q/set-pixel x y (get pixelsb i))))))
+
+
 
 (defn setup []
   (q/frame-rate 30)
@@ -57,7 +95,7 @@
   :setup setup
   ; update-state is called on each iteration before draw-state.
   ; :update update-state
-  :draw draw
+  :draw draw2
   :features [:keep-on-top]
   ; This sketch uses functional-mode middleware.
   ; Check quil wiki for more info about middlewares and particularly

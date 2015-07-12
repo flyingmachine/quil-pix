@@ -74,7 +74,8 @@
 (defn draw1 []
   (info "drawing")
   (let [pixels  (q/pixels)
-        pixelsb (profile :info :next-image (next-image pixels))
+        pixelsv (into [] pixels)
+        pixelsb (profile :info :next-image (next-image pixelsv))
         img (q/create-image width height :argb)
         ips (partition-all 100 (range pixcount))]
     (doseq [f (doall (map (fn [ip]
@@ -86,7 +87,8 @@
 
 (defn draw2 []
   (let [pixels  (q/pixels)
-        pixelsb (next-image pixels)
+        pixelsv (into [] pixels)
+        pixelsb (profile :info :next-image (next-image pixelsv))
         img (q/create-image width height :argb)]
     (doseq [i (range pixcount)]
       (let [[x y] (xy i width)]

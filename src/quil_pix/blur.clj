@@ -23,7 +23,7 @@
 
 (defn neighbors
   "Return a (rad x rad) square of a locations neighbors"
-  [i count rad width height]
+  [i rad width height]
   (let [[x1 y1] (xy i width)
         m  (* -1 rad)
         n  (inc rad)]
@@ -36,15 +36,15 @@
           :when (and (> y -1) (< y height))]
       [x y])))
 
-(defn random-color
-  "Used for testing"
-  []
-  (q/color (q/random 255) (q/random 255) (q/random 255)))
-
 (defn xy->i
   "return linear location given x and y"
   [[x y] width]
   (+ x (* y width)))
+
+(defn random-color
+  "Used for testing"
+  []
+  (q/color (q/random 255) (q/random 255) (q/random 255)))
 
 (defn rgb
   [pixel]
@@ -53,7 +53,7 @@
 (defn blur
   "average a location with its neighbors"
   [i rad row-len pixels]
-  (let [cells (neighbors i pixcount rad width height)
+  (let [cells (neighbors i rad width height)
         cc    (count cells)]
     (->> cells
          (map #(rgb (get pixels (xy->i % row-len))))
@@ -90,8 +90,7 @@
   (fn []
     (let [pixels  (q/pixels)
           pixelsv (into [] pixels)
-          pixelsb (next-image strat pixelsv)
-          img (q/create-image width height :argb)]
+          pixelsb (next-image strat pixelsv)]
       (doseq [i (range pixcount)]
         (aset pixels i (get pixelsb i)))
       (q/update-pixels))))
@@ -110,5 +109,3 @@
                                         ; fun-mode.
                                         ;:middleware [m/fun-mode]
 )
-
-

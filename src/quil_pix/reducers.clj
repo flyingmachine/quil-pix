@@ -1,5 +1,7 @@
 (ns quil-pix.reducers
-  (:require [clojure.core.reducers :as r]))
+  (:require [clojure.core.reducers :as r]
+            [taoensso.timbre.profiling :as profiling
+             :refer (pspy pspy* profile defnp p p*)]))
 
 (defn benchmark [f N times]
   (let [nums (vec (range N))
@@ -29,6 +31,12 @@
   (into [] (r/map inc nums)))
 
 (println "Eager v. Lazy v. Reducer filter+map, N=1000000, 10 repetitions")
-(println "Eager test:    " (benchmark eager-test 1000000 10) "ms")
-(println "Lazy test:     " (benchmark lazy-test 1000000 10) "ms")
-(println "Reducers test: " (benchmark reducer-test 1000000 10) "ms")
+(println "Eager test:    " (benchmark eager-test 100000 10) "ms")
+(println "Lazy test:     " (benchmark lazy-test 100000 10) "ms")
+(println "Reducers test: " (benchmark reducer-test 100000 10) "ms")
+
+
+(dorun (profile :info :map
+                (dotimes [n 10] (doall (map inc (vec (range 100000)))))))
+(dorun (profile :info :rmap
+                (dotimes [n 10] (into [] (r/map inc (vec (range 100000)))))))

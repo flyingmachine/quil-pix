@@ -58,7 +58,7 @@
     (->> cells
          (map #(rgb (get pixels (xy->i % row-len))))
          (apply map +)
-         (map #(/ % cc))
+         (map #(int (/ % cc)))
          (apply q/color))))
 
 (defn ppmap
@@ -110,3 +110,5 @@
                                         ; fun-mode.
                                         ;:middleware [m/fun-mode]
 )
+
+

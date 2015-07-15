@@ -72,14 +72,16 @@
 
 (defn next-image
   [strat pixels]
-  (profile :info strat
-           (let [blur #(blur % 3 width pixels)
-                 indexes (range pixcount)]
-             (condp = strat
-               :map     (mapv blur indexes)
-               :pmap    (into [] (pmap blur indexes))
-               :ppmap   (into [] (ppmap 1000 blur indexes))
-               :reducer (into [] (r/map blur (vec indexes)))))))
+  (try
+    (profile :info strat
+             (let [blur #(blur % 3 width pixels)
+                   indexes (range pixcount)]
+               (condp = strat
+                 :map     (mapv blur indexes)
+                 :pmap    (into [] (pmap blur indexes))
+                 :ppmap   (into [] (ppmap 1000 blur indexes))
+                 :reducer (into [] (r/foldcat (r/map (bound-fn* blur) (vec indexes)))))))
+    (catch Exception e (info "exception: " (.getMessage e)))))
 
 (defonce pixels (atom nil))
 (defonce graphics (atom nil))

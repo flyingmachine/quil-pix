@@ -81,10 +81,15 @@
                :ppmap   (into [] (ppmap 1000 blur indexes))
                :reducer (into [] (r/map blur (vec indexes)))))))
 
+(defonce pixels (atom nil))
+(defonce graphics (atom nil))
+
 (defn setup []
   (q/frame-rate 30)
   (q/color-mode :rgb)
-  (q/image (q/load-image (str "images/cat-" width ".jpg")) 0 0))
+  (q/image (q/load-image (str "images/cat-" width ".jpg")) 0 0)
+  (reset! pixels (q/pixels))
+  (reset! graphics (q/current-graphics)))
 
 (defn draw [strat]
   (fn []

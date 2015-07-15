@@ -1,0 +1,3 @@
+* debugging without a graphics context
+bind graphics and pixels to an atom
+(dorun (binding [quil.core/*graphics* @graphics] (next-image :pmap @pixels)))

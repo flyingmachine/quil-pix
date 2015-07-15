@@ -4,7 +4,7 @@
             [quil.applet :as a]
             [clojure.java.io :as io]
             [clojure.core.reducers :as r]
-            [taoensso.timbre :as timbre]
+            [taoensso.timbre :as timbre :refer [info]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]
             [taoensso.timbre.appenders.core :as appenders]))
@@ -95,17 +95,14 @@
         (aset pixels i (get pixelsb i)))
       (q/update-pixels))))
 
-(q/defsketch hello-quil
-  :title "It was you, you blur!"
-  :size [width height]
+(defn blur-sketch
+  [strat]
+  (q/sketch
+   :title "It was you, you blur!"
+   :size [width height]
                                         ; setup function called only once, during sketch initialization.
-  :setup setup
+   :setup setup
                                         ; update-state is called on each iteration before draw-state.
                                         ; :update update-state
-  :draw (draw :map)
-  :features [:keep-on-top]
-                                        ; This sketch uses functional-mode middleware.
-                                        ; Check quil wiki for more info about middlewares and particularly
-                                        ; fun-mode.
-                                        ;:middleware [m/fun-mode]
-)
+   :draw (draw strat)
+   :features [:keep-on-top]))

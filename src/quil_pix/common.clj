@@ -39,3 +39,14 @@
       (doseq [i (range (count pixels))]
         (aset pixels i (get pixelsb i)))
       (q/update-pixels))))
+
+(defonce pixels (atom nil))
+(defonce graphics (atom nil))
+
+(defn setup [width]
+  (fn []
+    (q/frame-rate 30)
+    (q/color-mode :rgb)
+    (q/image (q/load-image (str "images/cat-" width ".jpg")) 0 0)
+    (reset! pixels (q/pixels))
+    (reset! graphics (q/current-graphics))))

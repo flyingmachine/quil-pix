@@ -1,25 +1,11 @@
 (ns quil-pix.blur
-  (:require [quil.core :as q]
-            [quil.middleware :as m]
-            [quil.applet :as a]
-            [clojure.java.io :as io]
+  (:require [quil.core :as q]           
             [clojure.core.reducers :as r]
             [taoensso.timbre :as timbre :refer [info]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]
-            [taoensso.timbre.appenders.core :as appenders]))
-
-(timbre/merge-config!
- {:appenders {:spit (appenders/spit-appender {:fname "logs.txt"})}})
-
-(def width 150)
-(def height 150)
-(def pixcount (* width height))
-
-(defn xy
-  "Given a linear location and the grid's width, return x and y"
-  [i width]
-  [(mod i width) (int (/ i width))])
+            [taoensso.timbre.appenders.core :as appenders]
+            [quil-pix.common :refer [ppmap xy xy->i random-color rgb draw]]))
 
 (defn neighbors
   "Return a (rad x rad) square of a locations neighbors"
@@ -36,46 +22,23 @@
           :when (and (> y -1) (< y height))]
       [x y])))
 
-(defn xy->i
-  "return linear location given x and y"
-  [[x y] width]
-  (+ x (* y width)))
-
-(defn random-color
-  "Used for testing"
-  []
-  (q/color (q/random 255) (q/random 255) (q/random 255)))
-
-(defn rgb
-  [pixel]
-  (map #(% pixel) [q/red q/green q/blue]))
-
 (defn blur
   "average a location with its neighbors"
-  [i rad row-len pixels]
+  [i rad width height pixels]
   (let [cells (neighbors i rad width height)
         cc    (count cells)]
     (->> cells
-         (map #(rgb (get pixels (xy->i % row-len))))
+         (map #(rgb (get pixels (xy->i % width))))
          (apply map +)
          (map #(int (/ % cc)))
          (apply q/color))))
-
-(defn ppmap
-  "Partitioned pmap, for grouping map ops together to make parallel
-  overhead worthwhile"
-  [grain-size f & colls]
-  (apply concat
-         (apply pmap
-                (fn [& pgroups] (doall (apply map f pgroups)))
-                (map (partial partition-all grain-size) colls))))
 
 (defn next-image
   [strat pixels]
   (try
     (profile :info strat
-             (let [blur #(blur % 3 width pixels)
-                   indexes (range pixcount)]
+             (let [blur #(blur % 3 (q/width) (q/height) pixels)
+                   indexes (range (count pixels))]
                (condp = strat
                  :map     (mapv blur indexes)
                  :pmap    (into [] (pmap blur indexes))
@@ -86,30 +49,22 @@
 (defonce pixels (atom nil))
 (defonce graphics (atom nil))
 
-(defn setup []
-  (q/frame-rate 30)
-  (q/color-mode :rgb)
-  (q/image (q/load-image (str "images/cat-" width ".jpg")) 0 0)
-  (reset! pixels (q/pixels))
-  (reset! graphics (q/current-graphics)))
-
-(defn draw [strat]
+(defn setup [width]
   (fn []
-    (let [pixels  (q/pixels)
-          pixelsv (into [] pixels)
-          pixelsb (next-image strat pixelsv)]
-      (doseq [i (range pixcount)]
-        (aset pixels i (get pixelsb i)))
-      (q/update-pixels))))
+    (q/frame-rate 30)
+    (q/color-mode :rgb)
+    (q/image (q/load-image (str "images/cat-" width ".jpg")) 0 0)
+    (reset! pixels (q/pixels))
+    (reset! graphics (q/current-graphics))))
 
-(defn blur-sketch
-  [strat]
+(defn sketch
+  [strat width]
   (q/sketch
    :title "It was you, you blur!"
    :size [width height]
                                         ; setup function called only once, during sketch initialization.
-   :setup setup
+   :setup (setup width)
                                         ; update-state is called on each iteration before draw-state.
                                         ; :update update-state
-   :draw (draw strat)
+   :draw (draw #(next-image strat %))
    :features [:keep-on-top]))

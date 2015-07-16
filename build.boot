@@ -6,13 +6,18 @@
                  [org.clojure/clojure "1.7.0"]])
 
 (require '[quil.applet :as a]
-         '[quil-pix.blur :as b])
+         '[quil-pix.blur :as b]
+         '[taoensso.timbre :as timbre]
+         '[taoensso.timbre.appenders.core :as appenders])
+
+(timbre/merge-config!
+ {:appenders {:spit (appenders/spit-appender {:fname "logs.txt"})}})
 
 (def sketch (atom nil))
 (defn run-sketch [sketch-fn & args]
   (reset! sketch (apply sketch-fn args)))
 
-(defn run-blur [& args]
-  (apply run-sketch b/blur-sketch args))
+(defn run-blur [strat & [width]]
+  (run-sketch b/sketch strat (or width 150)))
 
 (defn close [] (a/applet-close @sketch))

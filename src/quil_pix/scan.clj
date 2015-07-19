@@ -13,7 +13,6 @@
        (map rgb)
        (apply map +)
        (map #(int (/ % (count colors))))
-       (map #(+ (- 1 (rand-int 3)) %))
        (apply q/color)))
 
 (defn scan-row
@@ -23,6 +22,7 @@
          cur-loc  (zip/right left-loc)]
     (if cur-loc
       (let [updated (zip/edit cur-loc (constantly (avg-colors (zip/node left-loc)
+                                                              (zip/node cur-loc)
                                                               (get prev-row i))))]
         (recur (inc i)
                updated

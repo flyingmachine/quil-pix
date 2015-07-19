@@ -30,7 +30,7 @@
   [pixel]
   (map #(% pixel) [q/red q/green q/blue]))
 
-(defn avg-colors [& colors]
+(defn avg-colors [colors]
   (->> colors
        (map rgb)
        (apply map +)

@@ -14,9 +14,9 @@
          left-loc (zip/down cur-row-loc)
          cur-loc  (zip/right left-loc)]
     (if cur-loc
-      (let [updated (zip/edit cur-loc (constantly (avg-colors (zip/node left-loc)
-                                                              (zip/node cur-loc)
-                                                              (get prev-row i))))]
+      (let [updated (zip/edit cur-loc (constantly (avg-colors [(zip/node left-loc)
+                                                               (zip/node cur-loc)
+                                                               (get prev-row i)])))]
         (recur (inc i)
                updated
                (zip/right updated)))

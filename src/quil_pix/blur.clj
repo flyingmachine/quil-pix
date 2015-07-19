@@ -29,7 +29,7 @@
         cc    (count cells)]
     (->> cells
          (map #(get pixels (xy->i % width)))
-         (apply avg-colors))))
+         avg-colors)))
 
 (defn next-image
   [strat pixels]

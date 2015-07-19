@@ -6,14 +6,7 @@
              :refer (pspy pspy* profile defnp p p*)]
             [taoensso.timbre.appenders.core :as appenders]
             [clojure.zip :as zip]
-            [quil-pix.common :refer [ppmap xy xy->i random-color rgb draw setup]]))
-
-(defn avg-colors [& colors]
-  (->> colors
-       (map rgb)
-       (apply map +)
-       (map #(int (/ % (count colors))))
-       (apply q/color)))
+            [quil-pix.common :refer [ppmap xy xy->i random-color rgb draw setup avg-colors]]))
 
 (defn scan-row
   [cur-row-loc prev-row]

@@ -5,7 +5,7 @@
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]
             [taoensso.timbre.appenders.core :as appenders]
-            [quil-pix.common :refer [ppmap xy xy->i random-color rgb draw setup]]))
+            [quil-pix.common :refer [ppmap xy xy->i random-color rgb draw setup avg-colors]]))
 
 (defn neighbors
   "Return a (rad x rad) square of a locations neighbors"
@@ -28,10 +28,8 @@
   (let [cells (neighbors i rad width height)
         cc    (count cells)]
     (->> cells
-         (map #(rgb (get pixels (xy->i % width))))
-         (apply map +)
-         (map #(int (/ % cc)))
-         (apply q/color))))
+         (map #(get pixels (xy->i % width)))
+         (apply avg-colors))))
 
 (defn next-image
   [strat pixels]

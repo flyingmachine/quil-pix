@@ -8,6 +8,7 @@
 (require '[quil.applet :as a]
          '[quil-pix.blur :as b]
          '[quil-pix.dim  :as d]
+         '[quil-pix.scan :as s]
          '[taoensso.timbre :as timbre]
          '[taoensso.timbre.appenders.core :as appenders])
 
@@ -23,5 +24,8 @@
 
 (defn run-dim [strat & [width]]
   (run-sketch d/sketch strat (or width 150)))
+
+(defn run-scan [strat & [width]]
+  (run-sketch s/sketch strat (or width 150)))
 
 (defn close [] (a/applet-close @sketch))

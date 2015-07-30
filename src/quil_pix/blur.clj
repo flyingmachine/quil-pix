@@ -1,11 +1,13 @@
 (ns quil-pix.blur
+  "Blurs are essentially maps, but they're kind of more interesting
+  because you have to access a pixel's neighbors"
   (:require [quil.core :as q]           
             [clojure.core.reducers :as r]
             [taoensso.timbre :as timbre :refer [info]]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]
             [taoensso.timbre.appenders.core :as appenders]
-            [quil-pix.common :refer [ppmap xy xy->i random-color rgb draw setup avg-colors]]))
+            [quil-pix.common :refer [tiled-pmap xy xy->i random-color rgb draw setup avg-colors]]))
 
 (defn neighbors
   "Return a (rad x rad) square of a locations neighbors"
@@ -38,10 +40,10 @@
              (let [blur #(blur % 3 (q/width) (q/height) pixels)
                    indexes (range (count pixels))]
                (condp = strat
-                 :map     (mapv blur indexes)
-                 :pmap    (into [] (pmap blur indexes))
-                 :ppmap   (into [] (ppmap 1000 blur indexes))
-                 :reducer (into [] (r/foldcat (r/map (bound-fn* blur) (vec indexes)))))))
+                 :map        (mapv blur indexes)
+                 :pmap       (into [] (pmap blur indexes))
+                 :tiled-pmap (into [] (tiled-pmap 1000 blur indexes))
+                 :reducer    (into [] (r/foldcat (r/map (bound-fn* blur) (vec indexes)))))))
     (catch Exception e (info "exception: " (.getMessage e)))))
 
 (defn sketch

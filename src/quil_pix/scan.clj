@@ -1,4 +1,10 @@
 (ns quil-pix.scan
+  "This won't be in the presentation, it was just something to play
+  around with.
+
+  It's not complete and it's not even an actuaal scan (it's more of a
+  recurrence) but it differs from blur in dim in that you access
+  values that have been computed so far for this iteration"
   (:require [quil.core :as q]           
             [clojure.core.reducers :as r]
             [taoensso.timbre :as timbre :refer [info]]
@@ -6,7 +12,7 @@
              :refer (pspy pspy* profile defnp p p*)]
             [taoensso.timbre.appenders.core :as appenders]
             [clojure.zip :as zip]
-            [quil-pix.common :refer [ppmap xy xy->i random-color rgb draw setup avg-colors]]))
+            [quil-pix.common :refer [tiled-pmap xy xy->i random-color rgb draw setup avg-colors]]))
 
 (defn zip-row
   [cur-row-loc prev-row]

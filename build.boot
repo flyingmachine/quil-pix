@@ -19,13 +19,13 @@
 (defn run-sketch [sketch-fn & args]
   (reset! sketch (apply sketch-fn args)))
 
-(defn run-blur [strat & [width]]
+(defn blur [strat & [width]]
   (run-sketch b/sketch strat (or width 150)))
 
-(defn run-dim [strat & [width]]
+(defn dim [strat & [width]]
   (run-sketch d/sketch strat (or width 150)))
 
-(defn run-scan [strat & [width]]
+(defn scan [strat & [width]]
   (run-sketch s/sketch strat (or width 150)))
 
 (defn close [] (a/applet-close @sketch))

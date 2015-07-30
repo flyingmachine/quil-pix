@@ -2,9 +2,9 @@
   (:require [quil.core :as q]
             [taoensso.timbre :as timbre :refer [info]]))
 
-(defn ppmap
-  "Partitioned pmap, for grouping map ops together to make parallel
-  overhead worthwhile"
+(defn tiled-pmap
+  "Tiled pmap, for grouping map ops together to make parallel overhead
+  worthwhile"
   [grain-size f & colls]
   (apply concat
          (apply pmap

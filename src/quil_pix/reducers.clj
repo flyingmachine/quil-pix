@@ -1,4 +1,6 @@
 (ns quil-pix.reducers
+  "This is a scratch pad that's really just the code from
+  http://adambard.com/blog/clojure-reducers-for-mortals/"
   (:require [clojure.core.reducers :as r]
             [taoensso.timbre.profiling :as profiling
              :refer (pspy pspy* profile defnp p p*)]))
